@@ -12,7 +12,15 @@ db: ## Configure secrets engine for database
 		--configure \
 		--role
 
-
+auth-k8s: ## Configure auth method for kubernetes
+	configure/vault-auth-kubernetes.sh \
+		--token-reviewer-jwt JWT \
+		--k8s-host host \
+		--role-name demo \
+		--policies policy \
+		--enable \
+		--configure \
+		--role
 
 print-%  : ## Print any variable from the Makefile (e.g. make print-VARIABLE);
 	@echo $* = $($*)

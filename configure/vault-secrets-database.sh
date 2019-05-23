@@ -48,6 +48,7 @@ function role() {
 ###----------------------------------------------------------------------------
 while true; do
   case "$1" in
+    --secrets-engine-path ) SECRETS_ENGINE_PATH=$2; shift 2;;
     -d | --db-name ) DATABASE_NAME=$2; shift 2;;
     -h | --host ) DATABASE_HOST=$2; shift 2;;
     -u | --username ) DATABASE_USERNAME=$2; shift 2;;
@@ -60,6 +61,8 @@ while true; do
     -e | --enable ) enable; shift;;
     -c | --configure ) configure; shift;;
     -r | --role ) role; shift;;
+
+    -- ) shift; break ;;
     * ) break ;;
   esac
 done
