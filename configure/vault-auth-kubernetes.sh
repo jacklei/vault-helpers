@@ -16,11 +16,11 @@ TTL=
 ###----------------------------------------------------------------------------
 ### FUNCTIONS
 ###----------------------------------------------------------------------------
-function enable() {
+enable() {
     vault auth enable ${AUTH_PATH:+"-path=$AUTH_PATH"} kubernetes
 }
 
-function configure() {
+configure() {
     : ${TOKEN_REVIEWER_JWT:?configure requires TOKEN_REVIEWER_JWT to be set, --token-reviewer-jwt jwt}
     : ${KUBERNETES_HOST:?configure requires KUBERNETES_HOST to be set, --k8s-host host}
 
@@ -30,7 +30,7 @@ function configure() {
         kubernetes_ca_cert=${KUBERNETES_CACERT:-@ca.crt}
 }
 
-function role() {
+role() {
     : ${ROLE_NAME:?role requires ROLE_NAME to be set, --role-name role_name}
 
     vault write auth/${AUTH_PATH:-kubernetes}/role/${ROLE_NAME} \

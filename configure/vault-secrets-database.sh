@@ -16,11 +16,11 @@ ROLE_MAX_TTL=
 ###----------------------------------------------------------------------------
 ### FUNCTIONS
 ###----------------------------------------------------------------------------
-function enable() {
+enable() {
     vault secrets enable ${SECRETS_ENGINE_PATH:+"-path=$SECRETS_ENGINE_PATH"} database
 }
 
-function configure() {
+configure() {
     : ${ROLE_NAME:?configure requires ROLE_NAME to be set, --role-name role_name}
     : ${DATABASE_NAME:?configure requires DATABASE_NAME to be set, --db-name database_name}
 
@@ -32,7 +32,7 @@ function configure() {
         password="${DATABASE_PASSWORD:-password}"
 }
 
-function role() {
+role() {
     : ${ROLE_NAME:?role requires ROLE_NAME to be set, --role-name role_name}
     : ${DATABASE_NAME:?role requires DATABASE_NAME to be set, --db-name database_name}
 
