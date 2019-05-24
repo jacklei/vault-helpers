@@ -32,6 +32,12 @@ configure() {
         password="${DATABASE_PASSWORD:-password}"
 }
 
+rotate_root() {
+    : ${DATABASE_NAME:?rotate_root requires DATABASE_NAME to be set, --db-name database_name}
+
+    vault write -f ${SECRETS_ENGINE_PATH:-database}/rotate-root/${DATABASE_NAME}
+}
+
 role() {
     : ${ROLE_NAME:?role requires ROLE_NAME to be set, --role-name role_name}
     : ${DATABASE_NAME:?role requires DATABASE_NAME to be set, --db-name database_name}
@@ -60,6 +66,7 @@ while true; do
 
     -e | --enable ) enable; shift;;
     -c | --configure ) configure; shift;;
+    --rotate-root ) rotate_root; shift;;
     -r | --role ) role; shift;;
 
     -- ) shift; break ;;

@@ -7,6 +7,7 @@ AUTH_PATH=
 TOKEN_REVIEWER_JWT=
 KUBERNETES_HOST=
 KUBERNETES_CACERT=
+KUBERNETES_CACERT_BASE64=
 ROLE_NAME=
 SERVICE_ACCOUNT_NAMES=
 SERVICE_ACCOUNT_NAMESPACES=
@@ -19,15 +20,20 @@ TTL=
 enable() {
     vault auth enable ${AUTH_PATH:+"-path=$AUTH_PATH"} kubernetes
 }
-
+# set -x
 configure() {
     : ${TOKEN_REVIEWER_JWT:?configure requires TOKEN_REVIEWER_JWT to be set, --token-reviewer-jwt jwt}
     : ${KUBERNETES_HOST:?configure requires KUBERNETES_HOST to be set, --k8s-host host}
 
+    # base64 decode kubernetes ca cert
+    if [[ -n KUBERNETES_CACERT_BASE64 && -n KUBERNETES_CACERT ]]; then
+        KUBERNETES_CACERT=$(echo "${KUBERNETES_CACERT}" | base64 --decode)
+    fi
+
     vault write auth/${AUTH_PATH:-kubernetes}/config \
         token_reviewer_jwt="${TOKEN_REVIEWER_JWT}" \
-        kubernetes_host=${KUBERNETES_HOST} \
-        kubernetes_ca_cert=${KUBERNETES_CACERT:-@ca.crt}
+        kubernetes_host="${KUBERNETES_HOST}" \
+        kubernetes_ca_cert="${KUBERNETES_CACERT:-@ca.crt}"
 }
 
 role() {
@@ -49,6 +55,10 @@ while true; do
     -j | --token-reviewer-jwt ) TOKEN_REVIEWER_JWT=$2; shift 2;;
     -h | --k8s-host ) KUBERNETES_HOST=$2; shift 2;;
     -c | --k8s-cacert ) KUBERNETES_CACERT=$2; shift 2;;
+    -c64 | --k8s-cacert-base64 ) 
+        KUBERNETES_CACERT=$2; 
+        KUBERNETES_CACERT_BASE64=true;
+        shift 2;;
     -rn | --role-name ) ROLE_NAME=$2; shift 2;;
     -n | --names ) SERVICE_ACCOUNT_NAMES=$2; shift 2;;
     -ns | --namespaces ) SERVICE_ACCOUNT_NAMESPACES=$2; shift 2;;

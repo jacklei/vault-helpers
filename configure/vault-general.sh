@@ -4,23 +4,17 @@ set -x
 ### VARIABLES
 ###----------------------------------------------------------------------------
 
-POLICY_NAME=
-POLICY_PATH=
-CAPABILITIES=()
+POLICY=
 
 ###----------------------------------------------------------------------------
 ### FUNCTIONS
 ###----------------------------------------------------------------------------
-policy() {
-    : ${POLICY_NAME:?policy requires POLICY_NAME to be set, --policy-name name}
-    : ${CAPABILITIES:?policy requires CAPABILITIES to be set, --capabilities cap1}
+policy() {    
+    FILE_PATH=$(dirname "$0")/../policies/${POLICY}
+    FILE=${FILE_PATH##*/}
+    NAME=${FILE%.*}
 
-    CAPABILITIES_JOINED=$(printf ",\"%s\"" "${CAPABILITIES[@]}")
-    vault policy write ${POLICY_NAME} -<<EOF
-path "${POLICY_PATH:-database/creds/readonly}" {
-  capabilities = [${CAPABILITIES_JOINED:1}]
-}
-EOF
+    vault policy write ${NAME} ${FILE_PATH}
 }
 
 ###----------------------------------------------------------------------------
@@ -29,11 +23,11 @@ EOF
 
 while true; do
   case "$1" in
-    -c | --capabilities ) CAPABILITIES+=("$2"); shift 2;;
-    -pn | --policy-name ) POLICY_NAME=$2; shift 2;;
-    -pp | --policy-path ) POLICY_PATH=$2; shift 2;;
 
-    -p | --policy ) policy; shift;;
+    -p | --policy )
+        POLICY=$2; 
+        policy; 
+        shift;;
 
 
     -- ) shift; break ;;
