@@ -1,6 +1,6 @@
 #!/usr/bin/env make
 
-all: setup port-forward db policy auth-k8s
+all: setup port-forward db policy auth-k8s newapp
 
 setup: ## Setup Kubernetes: token reviewer, rcb, config map, vault tls
 	configure/kubernetes.sh \
