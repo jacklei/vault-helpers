@@ -20,7 +20,7 @@ TTL=
 enable() {
     vault auth enable ${AUTH_PATH:+"-path=$AUTH_PATH"} kubernetes
 }
-# set -x
+
 configure() {
     : ${TOKEN_REVIEWER_JWT:?configure requires TOKEN_REVIEWER_JWT to be set, --token-reviewer-jwt jwt}
     : ${KUBERNETES_HOST:?configure requires KUBERNETES_HOST to be set, --k8s-host host}

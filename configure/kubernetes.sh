@@ -81,6 +81,7 @@ port_forward() {
     POD="$(kubectl get pod -l app="$APP" -o jsonpath='{.items[0].metadata.name}')"
     screen -dmS "$POD" /bin/bash -c \
         "kubectl port-forward $POD ${PORT}:${PORT}"
+    sleep 1
 }
 
 new_namespace() {

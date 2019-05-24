@@ -59,10 +59,10 @@ while true; do
     -h | --host ) DATABASE_HOST=$2; shift 2;;
     -u | --username ) DATABASE_USERNAME=$2; shift 2;;
     -p | --password ) DATABASE_PASSWORD=$2; shift 2;;
-    -rn | --role-name ) ROLE_NAME=$2; shift 2;;
     --creation-statements ) ROLE_CREATION_STATEMENTS=$2; shift 2;;
     --default-ttl ) ROLE_DEFAULT_TTL=$2; shift 2;;
     --max-ttl ) ROLE_MAX_TTL=$2; shift 2;;
+    --role-name ) ROLE_NAME=$2; shift 2;;
 
     -e | --enable ) enable; shift;;
     -c | --configure ) configure; shift;;

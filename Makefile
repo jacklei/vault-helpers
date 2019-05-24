@@ -1,6 +1,6 @@
 #!/usr/bin/env make
 
-all: setup port-forward db policy auth-k8s newapp
+all: setup port-forward db  auth-k8s 
 
 setup: ## Setup Kubernetes: token reviewer, rcb, config map, vault tls
 	configure/kubernetes.sh \
@@ -14,22 +14,8 @@ port-forward: ## port forward vault to 127.0.0.1
 		--context common-stage \
 		--port-forward vault 8200
 
-db: ## Configure secrets engine for database
-	# database host is on private network
-	configure/vault-secrets-database.sh \
-		--db-name demo2 \
-		--host demo2db.stage.opcon.dev:3306 \
-		--username root \
-		--password cloudnext \
-		--role-name demo-app \
-		--enable \
-		--configure \
-		--roatate-root \
-		--role
-
-policy: ## Configure vault policy
-	configure/vault-general.sh \
-		--policy demo-db-r.hcl
+db: ## enable secrets engine for database
+	configure/vault-secrets-database.sh --enable 
 
 auth-k8s: ## Configure auth method for kubernetes
 	# ensure we're on the correct context
@@ -43,22 +29,43 @@ auth-k8s: ## Configure auth method for kubernetes
 		--enable \
 		--configure 
 
-newapp: ## Everything that you need to do for a new namespace
-	configure/kubernetes.sh \
-		--context kubes-stage-la
+newapp: ## Everything that you need to do for a new app
 	# create kubernetes namespace with vault service token
 	configure/kubernetes.sh \
+		--context kubes-stage-la \
 		--new-namespace demo
-	# add new policies if any, we'll just use the one from make policy
-	# attach role to k8s auth
+
+	# 1. configure new db connection
+	# database/config/demo2
+	# demo2: database name
+	# 2. add role for generating dynamic secrets
+	# database/roles/demo-app
+	# demo-app: role that can generate passwords
+	configure/vault-secrets-database.sh \
+		--db-name demo2 \
+		--host demo2db.stage.opcon.dev:3306 \
+		--username root \
+		--password cloudnext \
+		--role-name demo-app\
+		--configure \
+		--roatate-root \
+		--role
+
+	# add policy, filename = policy name
+	# database/creds/demo-app
+	# creds: for dynamic secrets
+	# demo-app: the db role that can generate passwords
+	configure/vault-general.sh --policy demo-db-r.hcl
+
+	# attach role to k8s auth (demo is a k8s auth role)
+	# auth/kubernetes/role/demo
+	# demo: k8s role that is associated to the policy
+	# demo-db-r: policy name
 	configure/vault-auth-kubernetes.sh \
 		--names vault \
 		--namespaces demo \
 		--policies demo-db-r \
 		--role demo
-	# kubectl -n demo run -it --rm --image=alpine --serviceaccount=vault test -- /bin/sh
-	# 
-	# curl --request POST --data '{"jwt": "$JWT", "role": "demo"}' -k https://vault.stage.opcon.dev:8200/v1/auth/kubernetes/login
 
 
 # ------------------------ 'make all' ends here ------------------------------#
