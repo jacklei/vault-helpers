@@ -40,12 +40,25 @@ auth-k8s: ## Configure auth method for kubernetes
 		--token-reviewer-jwt $$(configure/kubernetes.sh --token-reviewer-jwt) \
 		--k8s-host $$(configure/kubernetes.sh --k8s-host) \
 		--k8s-cacert-base64 $$(configure/kubernetes.sh --k8s-cacert) \
-		--role-name demo \
-		--policies demo \
 		--enable \
-		--configure \
-		--role
+		--configure 
 
+newapp: ## Everything that you need to do for a new namespace
+	configure/kubernetes.sh \
+		--context kubes-stage-la
+	# create kubernetes namespace with vault service token
+	configure/kubernetes.sh \
+		--new-namespace demo
+	# add new policies if any, we'll just use the one from make policy
+	# attach role to k8s auth
+	configure/vault-auth-kubernetes.sh \
+		--names vault \
+		--namespaces demo \
+		--policies demo-db-r \
+		--role demo
+	# kubectl -n demo run -it --rm --image=alpine --serviceaccount=vault test -- /bin/sh
+	# 
+	# curl --request POST --data '{"jwt": "$JWT", "role": "demo"}' -k https://vault.stage.opcon.dev:8200/v1/auth/kubernetes/login
 
 
 # ------------------------ 'make all' ends here ------------------------------#

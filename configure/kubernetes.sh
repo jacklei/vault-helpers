@@ -5,7 +5,7 @@
 
 CONTEXT=
 VAULT_ADDR=
-
+NAMESPACE=
 
 ###----------------------------------------------------------------------------
 ### FUNCTIONS
@@ -83,6 +83,12 @@ port_forward() {
         "kubectl port-forward $POD ${PORT}:${PORT}"
 }
 
+new_namespace() {
+    : ${NAMESPACE:?new_namespace requires NAMESPACE to be set, --new-namespace namespace}
+    
+    kubectl create namespace ${NAMESPACE}
+    kubectl --namespace=${NAMESPACE} create serviceaccount vault
+}
 
 ###----------------------------------------------------------------------------
 ### MAIN PROGRAM
@@ -102,7 +108,10 @@ while true; do
     --token-reviewer-jwt ) get_token_reviewer_jwt; shift; break;;
     -h | --k8s-host ) get_k8s_host; shift; break;;
     --k8s-cacert ) get_k8s_cacert; shift; break;;    
-
+    -n | --new-namespace ) 
+        NAMESPACE=$2;
+        new_namespace;
+        shift 2;;
 
     -- ) shift; break ;;
     * ) break ;;

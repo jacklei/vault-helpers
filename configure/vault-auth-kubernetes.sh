@@ -40,7 +40,7 @@ role() {
     : ${ROLE_NAME:?role requires ROLE_NAME to be set, --role-name role_name}
 
     vault write auth/${AUTH_PATH:-kubernetes}/role/${ROLE_NAME} \
-        bound_service_account_names=${SERVICE_ACCOUNT_NAMES:-vault-auth} \
+        bound_service_account_names=${SERVICE_ACCOUNT_NAMES:-vault} \
         bound_service_account_namespaces=${SERVICE_ACCOUNT_NAMESPACES:-default} \
         policies=${POLICIES:-default} \
         ttl=${TTL:-1h}
@@ -59,7 +59,6 @@ while true; do
         KUBERNETES_CACERT=$2; 
         KUBERNETES_CACERT_BASE64=true;
         shift 2;;
-    -rn | --role-name ) ROLE_NAME=$2; shift 2;;
     -n | --names ) SERVICE_ACCOUNT_NAMES=$2; shift 2;;
     -ns | --namespaces ) SERVICE_ACCOUNT_NAMESPACES=$2; shift 2;;
     -p | --policies ) POLICIES=$2; shift 2;;
@@ -67,7 +66,10 @@ while true; do
 
     -e | --enable ) enable; shift;;
     -c | --configure ) configure; shift;;
-    -r | --role ) role; shift;;
+    -r | --role ) 
+        ROLE_NAME=$2;
+        role; 
+        shift 2;;
 
     -- ) shift; break ;;
     * ) break ;;
