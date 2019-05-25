@@ -80,7 +80,7 @@ curl --request POST --data '{"jwt": "$JWT", "role": "demo"}' -s -k https://vault
 
 Get your dynamic secret using the temporary token.
 ```
- curl --header "X-Vault-Token: $TOKEN" -s -k  https://vault.stage.opcon.dev:8200/v1/database/creds/demo-app | jq .
+curl --header "X-Vault-Token: $TOKEN" -s -k  https://vault.stage.opcon.dev:8200/v1/database/creds/demo-role | jq .
 ```
 
 Try it out.

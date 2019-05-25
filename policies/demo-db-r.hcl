@@ -1,3 +1,3 @@
-path "database/creds/demo-app" {
+path "database/creds/demo-role" {
   capabilities = ["read"]
 }
