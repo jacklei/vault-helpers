@@ -3,16 +3,16 @@
 ### VARIABLES
 ###----------------------------------------------------------------------------
 
-CONTEXT=
-VAULT_ADDR=
-NAMESPACE=
+context=
+vault_addr=
+namespace=
 
 ###----------------------------------------------------------------------------
 ### FUNCTIONS
 ###----------------------------------------------------------------------------
 
 use_context() {
-    kubectl config use-context ${CONTEXT:-minikube} &> /dev/null
+    kubectl config use-context ${context:-minikube} &> /dev/null
 }
 
 setup() {
@@ -37,58 +37,58 @@ subjects:
   name: vault-auth
   namespace: default
 EOH
-    # Create a config map to store the vault address
-    : ${VAULT_ADDR:?setup requires VAULT_ADDR to be set, --vault-addr https://vault_addr}
+    # create a config map to store the vault address
+    : ${vault_addr:?setup requires vault_addr to be set, --vault-addr https://vault_addr}
     kubectl create configmap vault \
-        --from-literal "vault_addr=${VAULT_ADDR}"
+        --from-literal "vault_addr=${vault_addr}"
 
-    : ${VAULT_CACERT:?setup requires VAULT_CACERT to be set, --vault-cacert /tmp/ca.pem}
-    # Create a secret for our CA
+    : ${vault_cacert:?setup requires vault_cacert to be set, --vault-cacert /tmp/ca.pem}
+    # create a secret for our ca
     kubectl create secret generic vault-tls \
-        --from-file "${VAULT_CACERT}"
+        --from-file "${vault_cacert}"
 
     }
 
 get_token_reviewer_jwt() {
-    # Get the name of the secret corresponding to the service account
-    SECRET_NAME="$(kubectl get serviceaccount vault-auth \
+    # get the name of the secret corresponding to the service account
+    secret_name="$(kubectl get serviceaccount vault-auth \
         -o go-template='{{ (index .secrets 0).name }}')"
 
-    # Get the actual token reviewer account
-    TR_ACCOUNT_TOKEN="$(kubectl get secret ${SECRET_NAME} \
+    # get the actual token reviewer account
+    tr_account_token="$(kubectl get secret ${secret_name} \
         -o go-template='{{ .data.token }}' | base64 --decode)"
 
-    echo "${TR_ACCOUNT_TOKEN}"
+    echo "${tr_account_token}"
 }
 
 get_k8s_host() {
     # found from https://kubernetes.io/docs/tasks/access-application-cluster/access-cluster/#without-kubectl-proxy
-    K8S_HOST="$(kubectl config view --minify | grep server | cut -f 2- -d ":" | tr -d " ")"
+    k8s_host="$(kubectl config view --minify | grep server | cut -f 2- -d ":" | tr -d " ")"
 
-    echo "${K8S_HOST}"
+    echo "${k8s_host}"
 }
 
 get_k8s_cacert() {
     # found from https://github.com/kubernetes/kubernetes/issues/61572
-    K8S_CACERT="$(kubectl config view --raw --minify --flatten -o jsonpath='{.clusters[].cluster.certificate-authority-data}')"
+    k8s_cacert="$(kubectl config view --raw --minify --flatten -o jsonpath='{.clusters[].cluster.certificate-authority-data}')"
 
-    echo "${K8S_CACERT}"
+    echo "${k8s_cacert}"
 }
 
 port_forward() {
-    APP="$1"
-    PORT="$2"
-    POD="$(kubectl get pod -l app="$APP" -o jsonpath='{.items[0].metadata.name}')"
-    screen -dmS "$POD" /bin/bash -c \
-        "kubectl port-forward $POD ${PORT}:${PORT}"
+    app="$1"
+    port="$2"
+    pod="$(kubectl get pod -l app="$app" -o jsonpath='{.items[0].metadata.name}')"
+    screen -dms "$pod" /bin/bash -c \
+        "kubectl port-forward $pod ${port}:${port}"
     sleep 1
 }
 
 new_namespace() {
-    : ${NAMESPACE:?new_namespace requires NAMESPACE to be set, --new-namespace namespace}
+    : ${namespace:?new_namespace requires namespace to be set, --new-namespace namespace}
     
-    kubectl create namespace ${NAMESPACE}
-    kubectl --namespace=${NAMESPACE} create serviceaccount vault
+    kubectl create namespace ${namespace}
+    kubectl --namespace=${namespace} create serviceaccount vault
 }
 
 ###----------------------------------------------------------------------------
@@ -98,11 +98,11 @@ new_namespace() {
 while true; do
   case "$1" in
     -c | --context ) 
-        CONTEXT=$2; 
+        context=$2; 
         use_context;
         shift 2;;
-    -v | --vault-addr ) VAULT_ADDR=$2; shift 2;;
-    -vca | --vault-cacert ) VAULT_CACERT=$2; shift 2;;
+    -v | --vault-addr ) vault_addr=$2; shift 2;;
+    -vca | --vault-cacert ) vault_cacert=$2; shift 2;;
 
     -p | --port-forward ) port_forward $2 $3; shift 3;;
     -s | --setup ) setup; shift;;
@@ -110,7 +110,7 @@ while true; do
     -h | --k8s-host ) get_k8s_host; shift; break;;
     --k8s-cacert ) get_k8s_cacert; shift; break;;    
     -n | --new-namespace ) 
-        NAMESPACE=$2;
+        namespace=$2;
         new_namespace;
         shift 2;;
 

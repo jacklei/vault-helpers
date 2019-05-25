@@ -3,47 +3,47 @@
 ### VARIABLES
 ###----------------------------------------------------------------------------
 
-AUTH_PATH=
-TOKEN_REVIEWER_JWT=
-KUBERNETES_HOST=
-KUBERNETES_CACERT=
-KUBERNETES_CACERT_BASE64=
-ROLE_NAME=
-SERVICE_ACCOUNT_NAMES=
-SERVICE_ACCOUNT_NAMESPACES=
-POLICIES=
-TTL=
+auth_path=
+token_reviewer_jwt=
+kubernetes_host=
+kubernetes_cacert=
+kubernetes_cacert_base64=
+role_name=
+service_account_names=
+service_account_namespaces=
+policies=
+ttl=
 
 ###----------------------------------------------------------------------------
 ### FUNCTIONS
 ###----------------------------------------------------------------------------
 enable() {
-    vault auth enable ${AUTH_PATH:+"-path=$AUTH_PATH"} kubernetes
+    vault auth enable ${auth_path:+"-path=$auth_path"} kubernetes
 }
 
 configure() {
-    : ${TOKEN_REVIEWER_JWT:?configure requires TOKEN_REVIEWER_JWT to be set, --token-reviewer-jwt jwt}
-    : ${KUBERNETES_HOST:?configure requires KUBERNETES_HOST to be set, --k8s-host host}
+    : ${token_reviewer_jwt:?configure requires token_reviewer_jwt to be set, --token-reviewer-jwt jwt}
+    : ${kubernetes_host:?configure requires kubernetes_host to be set, --k8s-host host}
 
     # base64 decode kubernetes ca cert
-    if [[ -n KUBERNETES_CACERT_BASE64 && -n KUBERNETES_CACERT ]]; then
-        KUBERNETES_CACERT=$(echo "${KUBERNETES_CACERT}" | base64 --decode)
+    if [[ -n kubernetes_cacert_base64 && -n kubernetes_cacert ]]; then
+        kubernetes_cacert=$(echo "${kubernetes_cacert}" | base64 --decode)
     fi
 
-    vault write auth/${AUTH_PATH:-kubernetes}/config \
-        token_reviewer_jwt="${TOKEN_REVIEWER_JWT}" \
-        kubernetes_host="${KUBERNETES_HOST}" \
-        kubernetes_ca_cert="${KUBERNETES_CACERT:-@ca.crt}"
+    vault write auth/${auth_path:-kubernetes}/config \
+        token_reviewer_jwt="${token_reviewer_jwt}" \
+        kubernetes_host="${kubernetes_host}" \
+        kubernetes_ca_cert="${kubernetes_cacert:-@ca.crt}"
 }
 
 role() {
-    : ${ROLE_NAME:?role requires ROLE_NAME to be set, --role-name role_name}
+    : ${role_name:?role requires role_name to be set, --role-name role_name}
 
-    vault write auth/${AUTH_PATH:-kubernetes}/role/${ROLE_NAME} \
-        bound_service_account_names=${SERVICE_ACCOUNT_NAMES:-vault} \
-        bound_service_account_namespaces=${SERVICE_ACCOUNT_NAMESPACES:-default} \
-        policies=${POLICIES:-default} \
-        ttl=${TTL:-1h}
+    vault write auth/${auth_path:-kubernetes}/role/${role_name} \
+        bound_service_account_names=${service_account_names:-vault} \
+        bound_service_account_namespaces=${service_account_namespaces:-default} \
+        policies=${policies:-default} \
+        ttl=${ttl:-1h}
 }
 
 ###----------------------------------------------------------------------------
@@ -51,23 +51,23 @@ role() {
 ###----------------------------------------------------------------------------
 while true; do
   case "$1" in
-    --auth-path ) AUTH_PATH=$2; shift 2;;
-    -j | --token-reviewer-jwt ) TOKEN_REVIEWER_JWT=$2; shift 2;;
-    -h | --k8s-host ) KUBERNETES_HOST=$2; shift 2;;
-    -c | --k8s-cacert ) KUBERNETES_CACERT=$2; shift 2;;
+    --auth-path ) auth_path=$2; shift 2;;
+    -j | --token-reviewer-jwt ) token_reviewer_jwt=$2; shift 2;;
+    -h | --k8s-host ) kubernetes_host=$2; shift 2;;
+    -c | --k8s-cacert ) kubernetes_cacert=$2; shift 2;;
     -c64 | --k8s-cacert-base64 ) 
-        KUBERNETES_CACERT=$2; 
-        KUBERNETES_CACERT_BASE64=true;
+        kubernetes_cacert=$2; 
+        kubernetes_cacert_base64=true;
         shift 2;;
-    -n | --names ) SERVICE_ACCOUNT_NAMES=$2; shift 2;;
-    -ns | --namespaces ) SERVICE_ACCOUNT_NAMESPACES=$2; shift 2;;
-    -p | --policies ) POLICIES=$2; shift 2;;
-    -t | --ttl ) TTL=$2; shift 2;;
+    -n | --names ) service_account_names=$2; shift 2;;
+    -ns | --namespaces ) service_account_namespaces=$2; shift 2;;
+    -p | --policies ) policies=$2; shift 2;;
+    -t | --ttl ) ttl=$2; shift 2;;
 
     -e | --enable ) enable; shift;;
     -c | --configure ) configure; shift;;
     -r | --role ) 
-        ROLE_NAME=$2;
+        role_name=$2;
         role; 
         shift 2;;
 

@@ -3,17 +3,17 @@
 ### VARIABLES
 ###----------------------------------------------------------------------------
 
-POLICY=
+policy=
 
 ###----------------------------------------------------------------------------
 ### FUNCTIONS
 ###----------------------------------------------------------------------------
 policy() {    
-    FILE_PATH=$(dirname "$0")/../policies/${POLICY}
-    FILE=${FILE_PATH##*/}
-    NAME=${FILE%.*}
+    file_path=$(dirname "$0")/../policies/${policy}
+    file=${file_path##*/}
+    name=${file%.*}
 
-    vault policy write ${NAME} ${FILE_PATH}
+    vault policy write ${name} ${file_path}
 }
 
 ###----------------------------------------------------------------------------
@@ -24,7 +24,7 @@ while true; do
   case "$1" in
 
     -p | --policy )
-        POLICY=$2; 
+        policy=$2; 
         policy; 
         shift;;
 
