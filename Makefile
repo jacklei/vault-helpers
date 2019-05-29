@@ -5,8 +5,6 @@ all: setup port-forward db  auth-k8s
 setup: ## Setup Kubernetes: token reviewer, rcb, config map, vault tls
 	configure/kubernetes.sh \
 		--context kubes-stage-la \
-		--vault-addr https://vault.stage.opcon.dev:8200 \
-		--vault-cacert $$VAULT_CACERT \
 		--setup
 
 port-forward: ## port forward vault to 127.0.0.1
@@ -33,6 +31,8 @@ newapp: ## Everything that you need to do for a new app
 	# create kubernetes namespace with vault service token
 	configure/kubernetes.sh \
 		--context kubes-stage-la \
+		--vault-addr https://vault.stage.opcon.dev:8200 \
+		--vault-cacert $$VAULT_CACERT \
 		--new-namespace demo
 
 	# 1. configure new db connection

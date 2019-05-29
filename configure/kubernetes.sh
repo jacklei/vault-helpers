@@ -37,15 +37,6 @@ subjects:
   name: vault-auth
   namespace: default
 EOH
-    # create a config map to store the vault address
-    : ${vault_addr:?setup requires vault_addr to be set, --vault-addr https://vault_addr}
-    kubectl create configmap vault \
-        --from-literal "vault_addr=${vault_addr}"
-
-    : ${vault_cacert:?setup requires vault_cacert to be set, --vault-cacert /tmp/ca.pem}
-    # create a secret for our ca
-    kubectl create secret generic vault-tls \
-        --from-file "${vault_cacert}"
 
     }
 
@@ -89,6 +80,17 @@ new_namespace() {
     
     kubectl create namespace ${namespace}
     kubectl --namespace=${namespace} create serviceaccount vault
+
+    # create a config map to store the vault address
+    : ${vault_addr:?setup requires vault_addr to be set, --vault-addr https://vault_addr}
+    kubectl --namespace=${namespace} create configmap vault \
+        --from-literal "vault_addr=${vault_addr}"
+
+    : ${vault_cacert:?setup requires vault_cacert to be set, --vault-cacert /tmp/ca.pem}
+    # create a secret for our ca
+    kubectl --namespace=${namespace} create secret generic vault-tls \
+        --from-file "${vault_cacert}"
+
 }
 
 ###----------------------------------------------------------------------------
