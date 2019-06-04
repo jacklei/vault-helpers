@@ -93,6 +93,12 @@ new_namespace() {
 
 }
 
+helm() {
+    kubectl create clusterrolebinding tiller-cluster-admin \
+        --clusterrole=cluster-admin --serviceaccount=kube-system:default
+    helm init --upgrade --wait
+}
+
 ###----------------------------------------------------------------------------
 ### MAIN PROGRAM
 ###----------------------------------------------------------------------------
@@ -105,7 +111,7 @@ while true; do
         shift 2;;
     -v | --vault-addr ) vault_addr=$2; shift 2;;
     -vca | --vault-cacert ) vault_cacert=$2; shift 2;;
-
+    --helm ) helm; shift;;
     -p | --port-forward ) port_forward $2 $3; shift 3;;
     -s | --setup ) setup; shift;;
     --token-reviewer-jwt ) get_token_reviewer_jwt; shift; break;;
