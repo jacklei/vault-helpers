@@ -39,22 +39,22 @@ newapp: ## Everything that you need to do for a new app
 	# database/config/demo-db-name
 	# demo2: database name
 	# 2. add role for generating dynamic secrets
-	# database/roles/demo-role
+	# database/roles/demo-db
 	# demo-app: role that can generate passwords
 	configure/vault-secrets-database.sh \
 		--db-name demo-db-name \
 		--host demo2db.stage.opcon.dev:3306 \
 		--username root \
 		--password cloudnext \
-		--role-name demo-role\
+		--role-name demo-db \
 		--configure \
 		--role
 
-	# add policy, filename = policy name
-	# database/creds/demo-role
+	# add policy
+	# database/creds/$namespace-db
 	# creds: for dynamic secrets
 	# demo-app: the db role that can generate passwords
-	configure/vault-general.sh --policy demo-db-r.hcl
+	configure/vault-general.sh --policy demo-db-r
 
 	# attach role to k8s auth (demo is a k8s auth role)
 	# auth/kubernetes/role/demo

@@ -36,6 +36,11 @@ configure() {
         kubernetes_ca_cert="${kubernetes_cacert:-@ca.crt}"
 }
 
+get_accessor() {
+    accessor=$(vault auth list -format=json | jq -r --arg auth_path "${auth_path:-kubernetes}" '.[$auth_path+"/"].accessor')
+    echo "${accessor}"
+}
+
 role() {
     : ${role_name:?role requires role_name to be set, --role-name role_name}
 
@@ -70,6 +75,7 @@ while true; do
         role_name=$2;
         role; 
         shift 2;;
+    -a | --accessor ) get_accessor; shift; break;;
 
     -- ) shift; break ;;
     * ) break ;;
