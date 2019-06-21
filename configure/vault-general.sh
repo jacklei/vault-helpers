@@ -14,7 +14,7 @@ policy() {
     accessor=$(configure/vault-auth-kubernetes.sh --accessor)
 
     vault policy write ${policy} -<<EOF
-path "database/creds/{{identity.entity.aliases.${accessor}.metadata.service_account_namespace}}-db" {
+path "database/creds/{{identity.entity.aliases.${accessor}.metadata.service_account_namespace}}-role" {
   capabilities = ["read"]
 }
 EOF

@@ -39,19 +39,19 @@ newapp: ## Everything that you need to do for a new app
 	# database/config/demo-db-name
 	# demo2: database name
 	# 2. add role for generating dynamic secrets
-	# database/roles/demo-db
+	# database/roles/demo-role
 	# demo-app: role that can generate passwords
 	configure/vault-secrets-database.sh \
 		--db-name demo-db-name \
 		--host demo2db.stage.opcon.dev:3306 \
 		--username root \
 		--password cloudnext \
-		--role-name demo-db \
+		--role-name demo-role \
 		--configure \
 		--role
 
 	# add policy
-	# database/creds/$namespace-db
+	# database/creds/$namespace-role
 	# creds: for dynamic secrets
 	# demo-app: the db role that can generate passwords
 	configure/vault-general.sh --policy demo-db-r
